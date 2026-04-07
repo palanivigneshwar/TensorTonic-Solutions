@@ -19,14 +19,10 @@ def information_gain(y, split_mask):
     """
     # Write code here
     N=len(y)
-    if N == 0 or split_mask.size==0:
-        return 0.0
-    hy=_entropy(split_mask)
-    split_mask=np.asarray(split_mask)
-    IG=hy
-    unique_classes,counts=np.unique(y,return_counts=True)
-    for (unique_class,count) in zip(unique_classes,counts):
-        unique_class_labels=split_mask[y==unique_class]
-        IG-=float(count/N)*_entropy(unique_class_labels)
+    booleans,counts=np.unique(split_mask,return_counts=True)
+    IG=_entropy(y)
+    for boolean,count in zip(booleans,counts):
+        y_mask=y[split_mask==boolean]
+        n=len(y_mask)
+        IG-=(n/N)*(_entropy(y_mask))
     return IG
-
