@@ -1,45 +1,37 @@
 import numpy as np
 
 def knn_distance(X_train, X_test, k):
-    """
-    Compute pairwise Euclidean distances and return k nearest neighbor indices.
-    """
-    # Convert inputs to numpy arrays
-    X_train = np.asarray(X_train)
-    X_test = np.asarray(X_test)
+    # 1. Standardize inputs to 2D arrays (N, D)
+    X_train = np.array(X_train)
+    X_test = np.array(X_test)
     
-    # Requirement: Support 1D and multi-dimensional features
-    # Hint 3: Handle 1D arrays by reshaping to 2D (n_samples, 1)
     if X_train.ndim == 1:
         X_train = X_train.reshape(-1, 1)
     if X_test.ndim == 1:
         X_test = X_test.reshape(-1, 1)
-
+        
     n_train = X_train.shape[0]
     n_test = X_test.shape[0]
 
-    # Hint 1: Use broadcasting to compute all pairwise differences
-    # Shape becomes (n_test, n_train, n_features)
+    # 2. Vectorized Distance Computation (Hint 1)
+    # This creates a (n_test, n_train, d) tensor of differences
     diff = X_test[:, np.newaxis, :] - X_train[np.newaxis, :, :]
+    
+    # Calculate Euclidean distance: Square -> Sum -> Sqrt
+    # Summing over axis 2 (the features)
+    distances = np.sqrt(np.sum(diff**2, axis=2))
 
-    # Euclidean Distance: sqrt(sum of squared differences across features)
-    # Sum along axis 2 (the feature dimension)
-    dist = np.sqrt(np.sum(diff**2, axis=2))
+    # 3. Sort indices by distance (Hint 2)
+    sorted_indices = np.argsort(distances, axis=1)
 
-    # Hint 2: Use np.argsort() to get indices of sorted distances
-    # Sort along axis 1 (the distances to each training point for every test point)
-    sorted_indices = np.argsort(dist, axis=1)
-
-    # Extract the first k neighbors
-    # Requirement: Sort neighbors by distance (closest first)
-    # If k > n_train, take all available first, then pad
-    actual_k = min(k, n_train)
-    neighbor_indices = sorted_indices[:, :actual_k]
-
-    # Requirement: Handle k larger than training set size (pad with -1)
+    # 4. Handle k larger than n_train (Requirement)
     if k > n_train:
-        padding = np.full((n_test, k - n_train), -1, dtype=int)
-        neighbor_indices = np.hstack([neighbor_indices, padding])
+        # Create a result array filled with -1
+        res = np.full((n_test, k), -1, dtype=int)
+        # Fill the first n_train columns with the actual sorted indices
+        res[:, :n_train] = sorted_indices
+    else:
+        # Just take the first k neighbors
+        res = sorted_indices[:, :k]
 
-    # Requirement: Return numpy array of shape (n_test, k) with integer dtype
-    return neighbor_indices.astype(int)
+    return res
