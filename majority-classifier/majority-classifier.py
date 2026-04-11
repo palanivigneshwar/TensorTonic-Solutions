@@ -6,5 +6,4 @@ def majority_classifier(y_train, X_test):
     """
     # Write code here
     cluster,count=np.unique(y_train,return_counts=True)
-    print(cluster[np.argmax(count)])
     return [cluster[np.argmax(count)]]*len(X_test)
