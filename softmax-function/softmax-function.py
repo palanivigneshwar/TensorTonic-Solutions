@@ -7,17 +7,15 @@ def softmax(x):
     For 2D, compute row-wise softmax.
     """
     # Write code here
-    if x.ndim==1:
-        if x.shape[0]==0:
-            return []
-        max_x=np.max(x)
-        exp=np.exp(x-max_x)
-        return exp/np.sum(exp)
-    # else:
-    #     smax=[softmax(X) for X in x]
-    #     return smax
-    max_x=np.max(x,axis=1,keepdims=True)
-    # print(f"x:{x},max_x:{max_x}")
-    exp=np.exp(x-max_x)
-    exp_sum=np.sum(exp,axis=1,keepdims=True)
-    return exp/exp_sum
+    x=np.asarray(x)
+    try:
+        print(x.shape)
+        N,D=x.shape
+        print(f"{N}X{D}")
+        ans=[]
+        for X in x:
+            ans.append(np.exp(X-np.max(X))/np.sum(np.exp(X-np.max(X))))
+        return ans
+    except:
+        return np.exp(x-np.max(x))/np.sum(np.exp(x-np.max(x)))
+        
